@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>登录页</title>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <form th:action="@{/api/login}" method="post">
+            <input class="row" type="text" name="username" width="200px" height="50px" placeholder="请输入用户名" />
+            <input class="row" type="password" name="password" width="200px" height="50px" placeholder="请输入密码" />
+            <input type="submit" class="form-select-button" value="登录">
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

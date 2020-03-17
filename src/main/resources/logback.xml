@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="60 seconds" debug="false">
+    <!--参数可以配置在配置文件中,这里要在最上面引入配置文件,使用${key}获取值 -->
+    <property resource="application.properties"/>
+    <property name="log.root.level" value="${log.root.level}" /> <!-- 日志级别 -->
+    <property name="log.base" value="/opt/logs/education-government" /> <!-- 日志路径 -->
+    <property name="log.moduleName" value="log" />  <!-- 模块名称， 影响日志配置名，日志文件名 -->
+    <property name="log.max.size" value="20MB" /> <!-- 日志文件大小 也可以不设置大小,只按照时间来滚动记录  -->
+
+    <!--控制台输出 -->
+    <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>%date{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread]%logger{56}.%method\(\):%L -%msg%n</Pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>${log.root.level}</level>
+        </filter>
+    </appender>
+
+    <!-- 按照小时生成日志文件 -->
+    <appender name="INFO"  class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <File>${log.base}/${log.moduleName}.log</File>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!--日志文件输出的文件名  按照小时切割  yyyy-MM-dd这样是按照天滚动保存日志-->
+            <FileNamePattern>${log.base}/${log.moduleName}_%d{yyyy-MM-dd.HH}.%i.log</FileNamePattern>
+            <!--控制最多保留多少数量 如果是按日滚动,那么一天有1个日志文件,240 代表能保存240个文件,就是 8天 (意思是保存八个月)  这里是按照HH 到小时,所以一天产生24个,也就是能保存10天的日志量-->
+            <MaxHistory>240</MaxHistory>
+            <!--日志文件切割大小-->
+            <maxFileSize>${log.max.size}</maxFileSize>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+        </encoder>
+        <!--输出级别拦截-->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>${log.root.level}</level>
+        </filter>
+    </appender>
+
+    <!--不管什么级别日志,都只拦截错误日志-->
+    <appender name="ERROR"  class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <File>${log.base}/${log.moduleName}.log</File>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!--日志文件输出的文件名-->
+            <FileNamePattern>${log.base}/${log.moduleName}_%d{yyyy-MM-dd.HH}.%i.log</FileNamePattern>
+            <!--日志文件保留小时数  如果是按照天切割,则代表是天数-->
+            <MaxHistory>240</MaxHistory>
+            <!--日志文件切割大小-->
+            <maxFileSize>${log.max.size}</maxFileSize>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+    </appender>
+
+
+    <!--myibatis log configure-->
+    <logger name="com.apache.ibatis" level="TRACE"/>
+    <logger name="java.sql.Connection" level="DEBUG"/>
+    <logger name="java.sql.Statement" level="DEBUG"/>
+    <logger name="java.sql.PreparedStatement" level="DEBUG"/>
+
+    <!-- 用来设置某一个包或者具体的某一个类的日志打印级别,addtivity代表是否向上级root传递打印信息。默认是true-->
+    <logger name="com.lang.blog" >
+        <level value="${log.root.level}" />
+        <!-- 标识这个appender将会添加到这个logger -->
+        <appender-ref ref="stdout" />
+        <appender-ref ref="INFO" />
+        <appender-ref ref="ERROR" />
+    </logger>
+    <logger name="org.springframework" additivity="false">
+        <level value="${log.root.level}"/>
+        <!-- 标识这个appender将会添加到这个logger -->
+        <appender-ref ref="stdout" />
+        <appender-ref ref="INFO" />
+        <appender-ref ref="ERROR" />
+    </logger>
+    <!-- root 只有一个level属性-->
+    <root level="${log.root.level}">
+        <!-- 标识这个appender将会添加到这个root -->
+        <appender-ref ref="stdout" />
+        <appender-ref ref="INFO" />
+        <appender-ref ref="ERROR" />
+    </root>
+</configuration>
