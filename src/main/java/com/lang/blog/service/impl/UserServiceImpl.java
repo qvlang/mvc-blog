@@ -2,6 +2,7 @@ package com.lang.blog.service.impl;
 
 import com.lang.blog.centers.PublishArticle;
 import com.lang.blog.centers.SubscriptCenter;
+import com.lang.blog.mapper.IUserRoleMapper;
 import com.lang.blog.mapper.UserMapper;
 import com.lang.blog.model.BlogUser;
 import com.lang.blog.service.IUserService;
@@ -18,13 +19,15 @@ public class UserServiceImpl implements IUserService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private SubscriptCenter subscriptCenter;
+    @Autowired
+    private IUserRoleMapper roleMapper;
 
-    public String login(String username) {
+    public BlogUser login(String username) {
         BlogUser user = mapper.findOne(username);
         if (user != null) {
-            return user.getPassword();
+            return user;
         } else {
-            return "";
+            return null;
         }
     }
 
@@ -64,5 +67,11 @@ public class UserServiceImpl implements IUserService {
 
         subscriptCenter.publish(uid, 9L, publishArticle);
         return false;
+    }
+
+    @Override
+    public String getUserRole(Long uid) {
+        String roleName = roleMapper.findRoleName(uid);
+        return roleName;
     }
 }
