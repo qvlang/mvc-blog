@@ -74,6 +74,6 @@
         <property name="cacheable" value="false"/>
         <property name="characterEncoding" value="UTF-8" />
     </bean>
-    <!-- 启动AspectJ支持   只对扫描过的bean有效-->
-    <aop:aspectj-autoproxy proxy-target-class="true" />
+    <!-- 启动AspectJ支持   只对扫描过的bean有效 expose-proxy=true 暴露代理类-->
+    <aop:aspectj-autoproxy proxy-target-class="true" expose-proxy="true" />
 </beans>

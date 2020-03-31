@@ -12,6 +12,7 @@ import com.lang.blog.model.ArticleLog;
 import com.lang.blog.model.result.CommonPageInfo;
 import com.lang.blog.service.IArticleService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,16 @@ import org.springframework.util.StringUtils;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * 前提：A方法调用B方法时，B方法有多个修改SQL
+ * <p>
+ * A方法没开启事务，B方法开启事务：A和B在同一类中，事务无效；A和B不在同一类中，事务生效。
+ * <p>
+ * A方法开启事务，B方法没开启事务：A和B在同一类中，事务生效；A和B不在同一类中，事务生效。
+ * 解决方法： 手动获取代理类AopContext.currentProxy() 通过代理类调用使得事务生效
+ */
 
 @Service
 @Slf4j
@@ -49,7 +60,8 @@ public class ArticleServiceImpl implements IArticleService {
         }
         Article article = mapper.findArticleByid(id);
         String articleString = JSON.toJSONString(article);
-        stringRedisTemplate.opsForValue().set(REDIS_ARTICLE_KEY + id, articleString);
+        //设置缓存过期时间为30S
+        stringRedisTemplate.opsForValue().set(REDIS_ARTICLE_KEY + id, articleString, 30, TimeUnit.SECONDS);
         return article;
     }
 
@@ -64,14 +76,18 @@ public class ArticleServiceImpl implements IArticleService {
 
     //新增文章后记录日志到数据库
     //使用事务保证两者必须同时完成
-    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.DEFAULT)
+    //@Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.DEFAULT)
     public boolean createArticle(Article article) {
         int affectrow = mapper.insertArticle(article);
         //向缓存的右边加入
         String s = JSON.toJSONString(article);
         stringRedisTemplate.opsForList().rightPush(REDIS_ARTICLES_KEY, s);
+        //为列表集合设置缓存过期时间
+        stringRedisTemplate.expire(REDIS_ARTICLES_KEY, 3, TimeUnit.MINUTES);
         //增加操作日志
-        writeArticleLog("新增文章", article);
+        ArticleServiceImpl currentProxy = (ArticleServiceImpl) AopContext.currentProxy();
+        currentProxy.writeArticleLog("新增文章", article);
+        //int k = 10 / 0;
         //发布文章后 关注他的用户就能收到文章推送
         PublishArticle publishArticle = new PublishArticle();
         subscriptCenter.publish(article.getAuthorId(), article.getId(), publishArticle);
@@ -172,5 +188,6 @@ public class ArticleServiceImpl implements IArticleService {
         articleLog.setOperation(handleType);
         articleLog.setParams(JSON.toJSONString(article));
         logMapper.insertLog(articleLog);
+        //int i = 10 / 0;
     }
 }
