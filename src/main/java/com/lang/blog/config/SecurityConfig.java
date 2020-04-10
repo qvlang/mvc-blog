@@ -13,7 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(securedEnabled = true,jsr250Enabled = true, prePostEnabled = true) //开启注解方法保卫配置
+@EnableGlobalMethodSecurity(securedEnabled = true, jsr250Enabled = true, prePostEnabled = true) //开启注解方法保卫配置
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private MyAuthenticationFailureHandler myAuthenticationFailureHandler;
@@ -40,7 +40,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         //关闭跨站请求伪造
         http.csrf().disable();
         http.formLogin()
-                .loginPage("/login.html")
+                .loginPage("/")
                 .loginProcessingUrl("/api/login")
                 .defaultSuccessUrl("/success", true)
                 .failureHandler(myAuthenticationFailureHandler);

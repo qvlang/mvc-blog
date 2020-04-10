@@ -25,7 +25,7 @@ public class ArticleCategoryController {
     private IArticleCategoryService categoryService;
 
     @GetMapping("")
-    @ApiOperation("获取文章目录及所属目录下的文章")
+    @ApiOperation("获取文章目录及所属目录下的文章:权限为admin和user")
     @Cacheable(key = "'category' + #p0")
     @Secured({"ROLE_admin", "ROLE_user"}) //必须以role开头 基于角色守卫
     public CommonResult<ArticleCategory> getArticleCategoryByName(String classifyName) {
@@ -35,7 +35,7 @@ public class ArticleCategoryController {
 
     //增加文章分类
     @PostMapping("")
-    @ApiOperation("增加文章目录")
+    @ApiOperation("增加文章目录:权限为admin")
     @Secured("ROLE_admin")
     public CommonResult addArticleCategory(@Validated @RequestBody ArticleCategory category, BindingResult result) {
         boolean isSuccess = categoryService.createArticleCategory(category);
@@ -46,6 +46,7 @@ public class ArticleCategoryController {
     @DeleteMapping("/{id}")
     @CacheEvict(key = "'category' + #p0")
     @Secured("ROLE_admin")
+    @ApiOperation("根据id删除分类:权限为admin")
     public CommonResult<String> deleteArticleCategoryById(@PathVariable Long id) {
         boolean isSuccess = categoryService.deleteArticleCategory(id);
         return isSuccess ? CommonResult.SUCCESS("删除成功") : CommonResult.FAILED("删除失败");
@@ -55,6 +56,7 @@ public class ArticleCategoryController {
     @PutMapping("")
     @CachePut(key = "'category'+ #p0.id")
     @Secured("ROLE_admin")
+    @ApiOperation("修改分类:权限为admin")
     public CommonResult<String> updateArticleCategoryById(@Validated @RequestBody ArticleCategory category, BindingResult result) {
         boolean isSuccess = categoryService.updateArticleCategory(category);
         return isSuccess ? CommonResult.SUCCESS("修改成功") : CommonResult.FAILED("修改失败");

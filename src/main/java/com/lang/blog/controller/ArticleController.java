@@ -24,7 +24,7 @@ public class ArticleController {
 
     //根据文章id查询查出文章和文章所属分类
     @GetMapping("/{id}")
-    @ApiOperation("通过文章id查询文章")
+    @ApiOperation("通过文章id查询文章:权限为user")
     @Secured("ROLE_user")
     public CommonResult<Article> getArticle(@PathVariable Long id) {
         Article article = articleService.getArticleByid(id);
@@ -33,7 +33,7 @@ public class ArticleController {
 
     //创建文章
     @PostMapping("")
-    @ApiOperation("创建文章")
+    @ApiOperation("创建文章:权限为user")
     @Secured("ROLE_user")
     public CommonResult<String> addArticle(@Validated @RequestBody Article article, BindingResult result) {
         boolean isSuccess = articleService.createArticle(article);
@@ -42,7 +42,7 @@ public class ArticleController {
 
     //修改文章
     @PutMapping("")
-    @ApiOperation("修改文章")
+    @ApiOperation("修改文章:权限为user")
     @Secured("ROLE_user")
     public CommonResult<String> updateArticle(@Validated @RequestBody Article article) {
         boolean isSuccess = articleService.updateArticle(article);
@@ -51,7 +51,7 @@ public class ArticleController {
 
     //修改文章
     @DeleteMapping("/{id}")
-    @ApiOperation("删除文章")
+    @ApiOperation("删除文章:权限为user")
     @Secured("ROLE_user")
     public CommonResult<String> deleteArticle(@PathVariable Long id) {
         boolean isSuccess = articleService.deleteArticle(id);
@@ -60,7 +60,7 @@ public class ArticleController {
 
     //分类查询所有文章
     @GetMapping("/pageList")
-    @ApiOperation("分页查询文章")
+    @ApiOperation("分页查询文章:权限为user")
     @Secured("ROLE_user")
     public CommonResult<CommonPageInfo<Article>> getPageList(Integer pageNum, Integer pageSize) {
         CommonPageInfo<Article> commonPageInfo = articleService.getPageList(pageNum, pageSize);
